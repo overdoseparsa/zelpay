@@ -36,10 +36,10 @@ class BaseUserManager(BUM):
         user.save(using=self._db)
 
         return user
-
+    
 
 class BaseUser(BaseModel, AbstractBaseUser, PermissionsMixin):
-
+   
     email = models.EmailField(verbose_name = "email address",
                               unique=True)
 

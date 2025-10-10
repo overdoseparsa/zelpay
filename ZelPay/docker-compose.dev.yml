@@ -3,7 +3,7 @@ version: "3.9"
 services:
 
   db:
-    image: postgres:14.1
+    image: focker.ir/postgres:14.1
     container_name: postgres
     ports:
       - 5432:5432
@@ -16,7 +16,7 @@ services:
 
   pgadmin:
     container_name: pgadmin4_container
-    image: dpage/pgadmin4
+    image: focker.ir/dpage/pgadmin4
     restart: always
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
@@ -25,7 +25,7 @@ services:
       - "5050:80"
 
   rabbitmq:
-    image: "rabbitmq:alpine"
+    image: "focker.ir/rabbitmq:alpine"
     container_name: rabbitmq
     healthcheck:
       test: rabbitmq-diagnostics -q ping
@@ -34,7 +34,7 @@ services:
       retries: 3
 
   redis:
-    image: redis:7
+    image: focker.ir/redis:7
     container_name: redis
     ports:
       - 6379:6379
