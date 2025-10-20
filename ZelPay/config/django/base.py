@@ -19,6 +19,7 @@ LOCAL_APPS = [
     'zelpaymant.users.apps.UsersConfig',
     'zelpaymant.authentication.apps.AuthenticationConfig',
     'zelpaymant.wallet.apps.WalletConfig' , # wallet project 
+    'zelpaymant.paymant.apps.PaymantConfig' , # paymeny project 
 ]
 
 THIRD_PARTY_APPS = [

@@ -42,7 +42,6 @@ class Wallet(TokenAbsractionModel):
     def __str__(self):
         return f"{self.name} ({self.user})"
 
-
 class Transaction(WalletAbstractBaseModel, MixinPaymentFaceCheck, TokenAbsractionModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="transactions")
     from_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name="transactions_from")
