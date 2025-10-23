@@ -46,35 +46,4 @@ class MixinFaceCheck(BaseModel):
         return str(self.name_mixin)
     
 
-class MixinPaymentFaceCheck(MixinFaceCheck):
-    payment_status = models.CharField(
-        max_length=50,
-        choices=[("pending", "در انتظار"), ("paid", "پرداخت شده"), ("failed", "ناموفق")],
-        default="pending"
-    )
-    payment_gateway = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True,
-        help_text="نام درگاه پرداخت (مثل Zarinpal، IDPay، یا ...) "
-    )
-    transaction_id = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True,
-        help_text="شناسه تراکنش از سمت درگاه"
-    )
-    payment_amount = models.DecimalField(
-        max_digits=12,
-        decimal_places=2,
-        null=True,
-        blank=True,
-        help_text="مبلغ پرداخت شده"
-    )
-    payment_date = models.DateTimeField(
-        null=True,
-        blank=True,
-        help_text="زمان انجام پرداخت"
-    )
-    server_id_process = models.GenericIPAddressField()
     

@@ -1,10 +1,12 @@
 from django.db import models
 from django.conf import settings
-from zelpaymant.common.models import BaseModel, MixinFaceCheck, MixinPaymentFaceCheck
+from zelpaymant.common.models import (
+    BaseModel,
+)
 
 User = settings.AUTH_USER_MODEL
 
-
+# this is the simple models from wallet must
 class Category(models.Model):
     name = models.CharField(max_length=100)
 
@@ -42,7 +44,7 @@ class Wallet(TokenAbsractionModel):
     def __str__(self):
         return f"{self.name} ({self.user})"
 
-class Transaction(WalletAbstractBaseModel, MixinPaymentFaceCheck, TokenAbsractionModel):
+class Transaction(WalletAbstractBaseModel, TokenAbsractionModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="transactions")
     from_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name="transactions_from")
     factor = models.ForeignKey('Invoice', on_delete=models.DO_NOTHING, related_name="transactions")
