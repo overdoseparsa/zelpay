@@ -1,15 +1,12 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any
+from typing import Dict, Any , Self
 from functools import cache 
 # provider : save the tranamaction in columns and add to the wallet 
-
+from logging import Logger
 class TransactionMixin(ABC):
     
-    def add_to_wallet(self, user_id: int, amount: int) -> None:
-        """افزودن مبلغ به کیف پول کاربر"""
-        raise NotImplementedError
 
-    def save_transaction_history(self, user_id: int, data: Dict[str, Any]) -> None:
+    def save_transaction(self, user_id: int, data: Dict[str, Any]) -> None:
         """ذخیره تاریخچه تراکنش در دیتابیس"""
         raise NotImplementedError
 
@@ -21,21 +18,29 @@ class TransactionMixin(ABC):
         """تولید توکن یکتا برای تراکنش"""
         raise NotImplementedError
 
-    def save_validate_transaction(self,token)->bool:
-        raise NotImplementedError
-
-
-
 
 
 
 class DjangoTransaction(TransactionMixin):# GET THE ORMS HERE 
     pass
 
+class MockRequets():...
+
 # --- Base Payment Gateway ---
-class BasePaymentGateway(ABC,TransactionMixin):
+# it is better to be in redis 
+class BasePaymentGateway(ABC,TransactionMixin):=
     authorize = None
-            
+
+    def pass_request(self,request:Any=None):
+        """
+        imaggin you want to pass some speaialize data 
+        from your logic 
+        you logic request is difreent 
+        you will pass your request to the this sections  
+                
+        """
+        
+        self._data['request'] = request 
     @staticmethod
     def static_authorize():...
         # select authorize from mytable ; 
@@ -48,9 +53,9 @@ class BasePaymentGateway(ABC,TransactionMixin):
             return static_authorize
         else : 
             return None 
-        
+
   
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: Dict[str, Any]): 
 
         self.__authorize = config.get('authorize') or self.get_authorize() 
         assert self.__authorize , "That provider Dont set authorize GatWay for ZarinPall"
@@ -61,6 +66,7 @@ class BasePaymentGateway(ABC,TransactionMixin):
         self.__description = str(config.get('description'))
         assert self.__description , "Must set description"
         self.token_transaction = self.generate_token()
+
     def set_config(self,**meta): # you can overload 
         self.config = {
             'authorize':self.__authorize,
@@ -69,6 +75,7 @@ class BasePaymentGateway(ABC,TransactionMixin):
             **meta,
         }
         return self.config
+
 
     @abstractmethod
     def send_request(self, callback_url: str = None) -> Dict[str, Any]:
@@ -81,11 +88,24 @@ class BasePaymentGateway(ABC,TransactionMixin):
         assert self.callback_url , "must set callback_url"
         self._data = self.set_config()
         self._data['callback_url'] = self.callback_url
+
+
+
+
+
+    @abstractmethod
+    @property
+    def prefer_callback_url(self):
+        pass # must be implement 
+
+
+class BaseVerification(ABC,TransactionMixin):
+    def __init__(self,token):
+        super().__init__()
     @abstractmethod
     def verify_transaction(self, authority: str) -> Dict[str, Any]:
         """تأیید پرداخت بعد از بازگشت کاربر"""
-        pass
-
+        pass# --- Example: Zarinpal Gateway ---
     @abstractmethod
     def refund(self, transaction_id: str) -> Dict[str, Any]:
         """بازگشت وجه"""
@@ -96,15 +116,10 @@ class BasePaymentGateway(ABC,TransactionMixin):
         """دریافت وضعیت تراکنش"""
         pass
 
-    @abstractmethod
-    @property
-    def prefer_callback_url(self):
-        pass # must be implement 
-
-# --- Example: Zarinpal Gateway ---
 from .provider import send_request_zarinpall
 
-class ZarinpalGateway(BasePaymentGateway):
+class ZarinpalGatewayReq(BasePaymentGateway):
+    # TODO add the request mock for 
     def __init__(self, config):
         super().__init__(config)
         # more argumans
@@ -134,28 +149,38 @@ class ZarinpalGateway(BasePaymentGateway):
         super().send_request(callback_url) # Set __data
         self.validate_transaction()
         # check the idempotancy 
-
+        self
         response =  send_request_zarinpall(
             "https://payment.zarinpal.com/pg/v4/payment/request.json" ,
             **self._data
         )
+        self.save_transaction(response) 
+         
+
+
+
+class ZarinpalGatewayVer(BaseVerification):
+    def __init__(self, token):
+        super().__init__(token)
+
+    def verify_transaction(self, authority):...
+        # get from cache or database and 
+        
+    def validate_transaction(self, data):
+        return super().validate_transaction(data) 
+        # check some validations from ransactaion  
+    def save_transaction_history(self, user_id, data):
         self.add_to_wallet()
-        self.save_transaction_history(response)
+        return super().save_transaction_history(user_id, data) 
 
-    def verify_transaction(self, authority: str) -> Dict[str, Any]:
-        return {"status": "verified", "ref_id": "ABC456"}
-
-    def refund(self, transaction_id: str) -> Dict[str, Any]:
-        return {"status": "refunded"}
-
-    def get_status(self, transaction_id: str) -> Dict[str, Any]:
-        return {"status": "settled"}
-
+    def add_to_wallet(self, user_id: int, amount: int) -> None:
+        """افزودن مبلغ به کیف پول کاربر"""
+        raise NotImplementedError
 
 # --- Transaction Manager ---
 class TransactionManager:
     gateways = {
-        "zarinpal": ZarinpalGateway,
+        "zarinpal": ZarinpalGatewayReq,
         # "paypal": PayPalGateway,
         # "stripe": StripeGateway,
     }

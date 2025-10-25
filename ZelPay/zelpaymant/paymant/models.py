@@ -30,23 +30,23 @@ class TransactionPayload(BaseModel):
 
     token_url = models.CharField(max_length=144)
 
-    is_verified = models.BooleanField(default=False)
 
     transaction = models.OneToOneField('Transaction', on_delete=models.CASCADE, null=True, blank=True)
     
+
 class Transaction(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sent_interactions")
     destination = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="received_interactions")
     authority = models.CharField(max_length=144)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     balance_after = models.DecimalField(max_digits=12, decimal_places=2)
-    is_valid = models.BooleanField(default=True)
-    is_completed = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=False)
     callback_url = models.URLField()
     idempotency_key = models.UUIDField(null=False)
     token = models.CharField(max_length=64, unique=True, editable=False)  # هش ذخیره میشه    # TODO: add network field in another table
     def save(self,*args,**kwargs):
         assert self.token , "Dont Validate Token"
+        
         return super().save(*args,**kwargs)
 
 
